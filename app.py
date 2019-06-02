@@ -4,6 +4,8 @@ import lxml.html
 import flask
 from flask import request, jsonify
 
+POPULAR_TOPICS_URL = "http://eksisozluk.com/basliklar/gundem?p="
+
 
 class PopularTopic:
     def __init__(self, title, numberOfComments, url):
@@ -100,8 +102,12 @@ def getComments(url):
 
 @app.route('/api/v1/popular', methods=['GET'])
 def api_getPopularTopics():
+
+    args = request.args
+    print(args)  # For debugging
+    page = args['page']
     popularList = getPopularTopics(
-        'http://eksisozluk.com/basliklar/gundem?p=1')
+        POPULAR_TOPICS_URL + page)
     return jsonify(
         popularTopics=[e.serialize() for e in popularList]
     )
