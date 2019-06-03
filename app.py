@@ -4,6 +4,7 @@ import lxml.html
 import flask
 from flask import request, jsonify
 
+EKSI_BASE_URL = "http://eksisozluk.com"
 POPULAR_TOPICS_URL = "http://eksisozluk.com/basliklar/gundem?p="
 
 
@@ -17,7 +18,7 @@ class PopularTopic:
         return {
             'title': self.title,
             'numberOfComments': self.numberOfComments,
-            'url': self.url
+            'url': EKSI_BASE_URL + self.url.split('?')[0]
         }
 
 
@@ -34,8 +35,8 @@ class Comment:
             'comment': self.comment,
             'date': self.date,
             'ownerUsername': self.ownerUsername,
-            'ownerProfileUrl': self.ownerProfileUrl,
-            'commentUrl': self.commentUrl
+            'ownerProfileUrl': EKSI_BASE_URL + self.ownerProfileUrl,
+            'commentUrl': EKSI_BASE_URL + self.commentUrl
         }
 
 
@@ -102,9 +103,7 @@ def getComments(url):
 
 @app.route('/api/v1/popular', methods=['GET'])
 def api_getPopularTopics():
-
     args = request.args
-    print(args)  # For debugging
     page = args['page']
     popularList = getPopularTopics(
         POPULAR_TOPICS_URL + page)
@@ -115,8 +114,11 @@ def api_getPopularTopics():
 
 @app.route('/api/v1/comments', methods=['GET'])
 def api_getComments():
+    args = request.args
+    baseCommentUrl = args['url']
+    page = args['page']
     commentList = getComments(
-        'https://eksisozluk.com/en-havali-japonca-soyisim--6047277')
+        baseCommentUrl + '?p=' + page)
     return jsonify(
         comments=[e.serialize() for e in commentList]
     )
