@@ -78,8 +78,8 @@ def getComments(url):
     dateList = []
 
     for content in ulTag.cssselect('[class="content"]'):
-        contentList.append(content.text_content())
-        print(content.text_content())
+        contentAsHTMLString = tostring(content).decode("utf-8")
+        contentList.append(md(contentAsHTMLString).strip())
 
     for author in ulTag.cssselect("[class=entry-author]"):
         authorUrl = author.get("href")
