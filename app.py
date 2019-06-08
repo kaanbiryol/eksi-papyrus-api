@@ -3,6 +3,8 @@ import requests
 import lxml.html
 import flask
 from flask import request, jsonify
+from lxml.etree import tostring
+from markdownify import markdownify as md
 
 EKSI_BASE_URL = "http://eksisozluk.com"
 POPULAR_TOPICS_URL = "http://eksisozluk.com/basliklar/gundem?p="
@@ -82,11 +84,9 @@ def getComments(url):
     for author in ulTag.cssselect("[class=entry-author]"):
         authorUrl = author.get("href")
         authorList.append((authorUrl, author.text_content()))
-        print(author.text_content(), authorUrl)
 
     for date in ulTag.cssselect("a.entry-date.permalink"):
         dateList.append((date.text_content(), date.get("href")))
-        print(date.text_content(), date.get("href"))
 
     for index, element in enumerate(contentList):
         content = contentList[index]

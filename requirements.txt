@@ -3,3 +3,4 @@ requests
 uwsgi
 lxml
 cssselect
+markdownify
