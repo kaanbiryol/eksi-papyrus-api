@@ -7,7 +7,8 @@ from lxml.etree import tostring
 from markdownify import markdownify as md
 
 EKSI_BASE_URL = "http://eksisozluk.com"
-POPULAR_TOPICS_URL = "http://eksisozluk.com/basliklar/gundem?p="
+POPULAR_TOPICS_URL = EKSI_BASE_URL + "/basliklar/gundem?p="
+EKSI_CHANNELS_URL = EKSI_BASE_URL + "/kanallar"
 
 
 class PopularTopic:
@@ -16,9 +17,10 @@ class PopularTopic:
         self.numberOfComments = numberOfComments
         self.url = url
 
+    # might need to converto https
     def serialize(self):
         return {
-            'title': self.title,
+            'title': self.title.strip(),
             'numberOfComments': self.numberOfComments,
             'url': EKSI_BASE_URL + self.url.split('?')[0]
         }
@@ -42,6 +44,18 @@ class Comment:
         }
 
 
+class Channel:
+    def __init__(self, title, url):
+        self.title = title
+        self.url = url
+
+    def serialize(self):
+        return {
+            'title': self.title,
+            'url': EKSI_BASE_URL + self.url
+        }
+
+
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
@@ -59,7 +73,10 @@ def getPopularTopics(url):
     for liTag in ulTag.cssselect("a"):
         smallTag = liTag.cssselect("small")
         topicTitle = liTag.text
-        numberOfComments = smallTag[0].text_content()
+        if smallTag:
+            numberOfComments = smallTag[0].text_content()
+        else:
+            numberOfComments = "0"
         topicUrl = liTag.get("href")
         popularTopic = PopularTopic(topicTitle, numberOfComments, topicUrl)
         popularList.append(popularTopic)
@@ -76,6 +93,8 @@ def getComments(url):
     contentList = []
     authorList = []
     dateList = []
+
+    tree.cssselect('[class="pager"]')[0].get('data-pagecount')
 
     for content in ulTag.cssselect('[class="content"]'):
         contentAsHTMLString = tostring(content).decode("utf-8")
@@ -99,6 +118,27 @@ def getComments(url):
         commentList.append(comment)
 
     return commentList
+
+
+def getChannels():
+    response = requests.get(EKSI_CHANNELS_URL, headers=headers)
+    tree = lxml.html.fromstring(response.text)
+    ulTag = tree.cssselect("[id=channel-follow-list]")
+    channelList = []
+    channel = ulTag[0].cssselect("[class=index-link]")
+    for item in channel:
+        channelList.append(
+            Channel(item.text_content(), item.get("href")))
+
+    return channelList
+
+
+@app.route('/api/v1/channels', methods=['GET'])
+def api_getChannels():
+    channelList = getChannels()
+    return jsonify(
+        channels=[e.serialize() for e in channelList]
+    )
 
 
 @app.route('/api/v1/popular', methods=['GET'])
