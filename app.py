@@ -7,11 +7,15 @@ from lxml.etree import tostring
 from markdownify import markdownify as md
 
 EKSI_BASE_URL = "http://eksisozluk.com"
-POPULAR_TOPICS_URL = EKSI_BASE_URL + "/basliklar/gundem?p="
 EKSI_CHANNELS_URL = EKSI_BASE_URL + "/kanallar"
+EKSI_PAGE_PARAMETER = "?p="
 
 
-class PopularTopic:
+def generateTopicPageUrl(path, page):
+    return EKSI_BASE_URL + path + EKSI_PAGE_PARAMETER + page
+
+
+class Topic:
     def __init__(self, title, numberOfComments, url):
         self.title = title
         self.numberOfComments = numberOfComments
@@ -64,8 +68,8 @@ headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"}
 
 
-def getPopularTopics(url):
-    popularList = []
+def getTopics(url):
+    topicList = []
 
     response = requests.get(url, headers=headers)
     tree = lxml.html.fromstring(response.text)
@@ -78,9 +82,9 @@ def getPopularTopics(url):
         else:
             numberOfComments = "0"
         topicUrl = liTag.get("href")
-        popularTopic = PopularTopic(topicTitle, numberOfComments, topicUrl)
-        popularList.append(popularTopic)
-    return popularList
+        popularTopic = Topic(topicTitle, numberOfComments, topicUrl)
+        topicList.append(popularTopic)
+    return topicList
 
 
 def getComments(url):
@@ -141,12 +145,13 @@ def api_getChannels():
     )
 
 
-@app.route('/api/v1/popular', methods=['GET'])
-def api_getPopularTopics():
+@app.route('/api/v1/topics', methods=['GET'])
+def api_getTopics():
     args = request.args
+    urlPath = args["path"]
     page = args['page']
-    popularList = getPopularTopics(
-        POPULAR_TOPICS_URL + page)
+    popularList = getTopics(
+        generateTopicPageUrl(path=urlPath, page=page))
     return jsonify(
         popularTopics=[e.serialize() for e in popularList]
     )
