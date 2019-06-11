@@ -7,6 +7,7 @@ from lxml.etree import tostring
 from markdownify import markdownify as md
 
 EKSI_BASE_URL = "http://eksisozluk.com"
+POPULAR_TOPICS_URL = EKSI_BASE_URL + "/basliklar/gundem?p="
 EKSI_CHANNELS_URL = EKSI_BASE_URL + "/kanallar"
 EKSI_PAGE_PARAMETER = "?p="
 
@@ -56,7 +57,7 @@ class Channel:
     def serialize(self):
         return {
             'title': self.title,
-            'url': EKSI_BASE_URL + self.url
+            'url': self.url
         }
 
 
@@ -152,6 +153,17 @@ def api_getTopics():
     page = args['page']
     popularList = getTopics(
         generateTopicPageUrl(path=urlPath, page=page))
+    return jsonify(
+        popularTopics=[e.serialize() for e in popularList]
+    )
+
+
+@app.route('/api/v1/popular', methods=['GET'])
+def api_getPopularTopics():
+    args = request.args
+    page = args['page']
+    popularList = getTopics(
+        POPULAR_TOPICS_URL + page)
     return jsonify(
         popularTopics=[e.serialize() for e in popularList]
     )
