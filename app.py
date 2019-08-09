@@ -211,7 +211,7 @@ def api_search():
     query = args['query']
     results = autoComplete(query)
     return jsonify(
-        comments=[results.serialize()]
+        results=results.serialize()
     )
 
 
