@@ -2,6 +2,8 @@
 import requests
 import lxml.html
 import flask
+import time
+import json
 from flask import request, jsonify
 from lxml.etree import tostring
 from markdownify import markdownify as md
@@ -9,6 +11,7 @@ from markdownify import markdownify as md
 EKSI_BASE_URL = "http://eksisozluk.com"
 POPULAR_TOPICS_URL = EKSI_BASE_URL + "/basliklar/gundem?p="
 EKSI_CHANNELS_URL = EKSI_BASE_URL + "/kanallar"
+EKSI_AUTOCOMPLETE_URL = EKSI_BASE_URL + "/autocomplete/query?q="
 EKSI_PAGE_PARAMETER = "?p="
 
 
@@ -61,12 +64,33 @@ class Channel:
         }
 
 
+class AutoComplete:
+    def __init__(self, title):
+        self.title = title
+
+    def serialize(self):
+        return {
+            'title': self.title
+        }
+
+
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"}
+
+
+def autoComplete(query):
+    customHeaders = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36", "X-Requested-With": "XMLHttpRequest"}
+    response = requests.get(EKSI_AUTOCOMPLETE_URL + query + "&_=" +
+                            str(int(round(time.time() * 1000))), headers=customHeaders)
+    responseValue = json.loads(response.text)
+    value = responseValue["Titles"]
+    results = AutoComplete(value)
+    return results
 
 
 def getTopics(url):
@@ -178,6 +202,16 @@ def api_getComments():
         baseCommentUrl + '?p=' + page)
     return jsonify(
         comments=[e.serialize() for e in commentList]
+    )
+
+
+@app.route('/api/v1/search', methods=['GET'])
+def api_search():
+    args = request.args
+    query = args['query']
+    results = autoComplete(query)
+    return jsonify(
+        comments=[results.serialize()]
     )
 
 
