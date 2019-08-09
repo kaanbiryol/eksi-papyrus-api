@@ -4,5 +4,3 @@ uwsgi
 lxml
 cssselect
 markdownify
-json
-time
