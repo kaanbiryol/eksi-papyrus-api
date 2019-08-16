@@ -70,7 +70,7 @@ class AutoComplete:
 
     def serialize(self):
         return {
-            'title': self.title
+            'titles': self.title
         }
 
 
@@ -211,7 +211,7 @@ def api_search():
     query = args['query']
     results = autoComplete(query)
     return jsonify(
-        results=results.serialize()
+        results.serialize()
     )
 
 
