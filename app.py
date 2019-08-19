@@ -12,6 +12,7 @@ EKSI_BASE_URL = "http://eksisozluk.com"
 POPULAR_TOPICS_URL = EKSI_BASE_URL + "/basliklar/gundem?p="
 EKSI_CHANNELS_URL = EKSI_BASE_URL + "/kanallar"
 EKSI_AUTOCOMPLETE_URL = EKSI_BASE_URL + "/autocomplete/query?q="
+EKSI_QUERY_URL = EKSI_BASE_URL + "?q="
 EKSI_PAGE_PARAMETER = "?p="
 
 
@@ -93,6 +94,11 @@ def autoComplete(query):
     return results
 
 
+def query(query):
+    response = requests.get(EKSI_QUERY_URL + query, headers=headers)
+    return getComments(response.url)
+
+
 def getTopics(url):
     topicList = []
 
@@ -113,12 +119,11 @@ def getTopics(url):
 
 
 def getComments(url):
-    commentList = []
-
     response = requests.get(url, headers=headers)
     tree = lxml.html.fromstring(response.text)
     ulTag = tree.cssselect("[id=entry-item-list]")[0]
 
+    commentList = []
     contentList = []
     authorList = []
     dateList = []
@@ -212,6 +217,16 @@ def api_search():
     results = autoComplete(query)
     return jsonify(
         results.serialize()
+    )
+
+
+@app.route('/api/v1/query', methods=['GET'])
+def api_query():
+    args = request.args
+    queryValue = args['q']
+    commentList = query(queryValue)
+    return jsonify(
+        comments=[e.serialize() for e in commentList]
     )
 
 
