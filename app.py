@@ -75,6 +75,16 @@ class AutoComplete:
         }
 
 
+class Query:
+    def __init__(self, topicUrl):
+        self.topicUrl = topicUrl
+
+    def serialize(self):
+        return {
+            'topicUrl': self.topicUrl
+        }
+
+
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
@@ -96,7 +106,8 @@ def autoComplete(query):
 
 def query(query):
     response = requests.get(EKSI_QUERY_URL + query, headers=headers)
-    return getComments(response.url)
+    queryObject = Query(response.url)
+    return queryObject
 
 
 def getTopics(url):
@@ -224,9 +235,9 @@ def api_search():
 def api_query():
     args = request.args
     queryValue = args['q']
-    commentList = query(queryValue)
+    queryResults = query(queryValue)
     return jsonify(
-        comments=[e.serialize() for e in commentList]
+        queryResults.serialize()
     )
 
 
