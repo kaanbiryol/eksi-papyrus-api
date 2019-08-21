@@ -15,6 +15,10 @@ EKSI_AUTOCOMPLETE_URL = EKSI_BASE_URL + "/autocomplete/query?q="
 EKSI_QUERY_URL = EKSI_BASE_URL + "?q="
 EKSI_PAGE_PARAMETER = "?p="
 
+EKSI_COMMENTS_TODAY = "?a=dailynice"
+EKSI_COMMENTS_ALL = "?a=nice"
+EKSI_COMMENTS_POPULAR = "?a=popular"
+
 
 def generateTopicPageUrl(path, page):
     return EKSI_BASE_URL + path + EKSI_PAGE_PARAMETER + page
@@ -183,6 +187,20 @@ def getChannels():
     return channelList
 
 
+def makeCommentsUrl(topicUrl, type, page):
+
+    commentType = EKSI_COMMENTS_POPULAR
+    if type == "popular":
+        commentType = EKSI_COMMENTS_POPULAR
+    elif type == "today":
+        commentType = EKSI_COMMENTS_TODAY
+    elif type == "all":
+        commentType = EKSI_COMMENTS_ALL
+
+    url = topicUrl + commentType + '&p=' + page
+    return url
+
+
 @app.route('/api/v1/channels', methods=['GET'])
 def api_getChannels():
     channelList = getChannels()
@@ -218,9 +236,9 @@ def api_getPopularTopics():
 def api_getComments():
     args = request.args
     baseCommentUrl = args['url']
+    type = args['type']
     page = args['page']
-    commentList = getComments(
-        baseCommentUrl + '?p=' + page)
+    commentList = getComments(makeCommentsUrl(baseCommentUrl, type, page))
     return jsonify(
         comments=[e.serialize() for e in commentList[0]],
         page=commentList[1],
