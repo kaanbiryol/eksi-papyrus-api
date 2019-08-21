@@ -151,10 +151,10 @@ def getComments(url):
     contentList = []
     authorList = []
     dateList = []
-
-    pager = tree.cssselect('[class="pager"]')[0]
-    pageCount = pager.get('data-pagecount')
-    currentPage = pager.get('data-currentpage')
+    pagerTree = tree.cssselect('[class="pager"]')
+    pager = pagerTree[0] if len(pagerTree) > 0 else None
+    pageCount = pager.get('data-pagecount') if pager != None else 1
+    currentPage = pager.get('data-currentpage') if pager != None else 1
 
     for content in ulTag.cssselect('[class="content"]'):
         contentAsHTMLString = tostring(content).decode("utf-8")
