@@ -51,9 +51,7 @@ class Comment:
             'date': self.date,
             'ownerUsername': self.ownerUsername,
             'ownerProfileUrl': EKSI_BASE_URL + self.ownerProfileUrl,
-            'commentUrl': EKSI_BASE_URL + self.commentUrl,
-            'page': currentPage,
-            'pageCount': pageCount
+            'commentUrl': EKSI_BASE_URL + self.commentUrl
         }
 
 
@@ -169,7 +167,7 @@ def getComments(url):
                           commentUrl, currentPage, pageCount)
         commentList.append(comment)
 
-    return commentList
+    return (commentList, currentPage, pageCount)
 
 
 def getChannels():
@@ -224,7 +222,9 @@ def api_getComments():
     commentList = getComments(
         baseCommentUrl + '?p=' + page)
     return jsonify(
-        comments=[e.serialize() for e in commentList]
+        comments=[e.serialize() for e in commentList[0]],
+        page=commentList[1],
+        pageCount=commentList[2]
     )
 
 
