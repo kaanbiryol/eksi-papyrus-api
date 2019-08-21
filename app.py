@@ -194,7 +194,7 @@ def api_getTopics():
     popularList = getTopics(
         generateTopicPageUrl(path=urlPath, page=page))
     return jsonify(
-        popularTopics=[e.serialize() for e in popularList]
+        topics=[e.serialize() for e in popularList]
     )
 
 
@@ -205,7 +205,7 @@ def api_getPopularTopics():
     popularList = getTopics(
         POPULAR_TOPICS_URL + page)
     return jsonify(
-        popularTopics=[e.serialize() for e in popularList]
+        topics=[e.serialize() for e in popularList]
     )
 
 
