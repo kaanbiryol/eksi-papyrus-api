@@ -7,6 +7,7 @@ import json
 from flask import request, jsonify
 from lxml.etree import tostring
 from markdownify import markdownify as md
+from enum import IntEnum
 
 EKSI_BASE_URL = "http://eksisozluk.com"
 POPULAR_TOPICS_URL = EKSI_BASE_URL + "/basliklar/gundem?p="
@@ -18,6 +19,12 @@ EKSI_PAGE_PARAMETER = "?p="
 EKSI_COMMENTS_TODAY = "?a=dailynice"
 EKSI_COMMENTS_ALL = "?a=nice"
 EKSI_COMMENTS_POPULAR = "?a=popular"
+
+
+class CommentType(IntEnum):
+    today = 0
+    popular = 1
+    all = 2
 
 
 def generateTopicPageUrl(path, page):
@@ -190,11 +197,12 @@ def getChannels():
 def makeCommentsUrl(topicUrl, type, page):
 
     commentType = EKSI_COMMENTS_POPULAR
-    if type == "popular":
+    type = int(type)
+    if type == CommentType.popular:
         commentType = EKSI_COMMENTS_POPULAR
-    elif type == "today":
+    elif type == CommentType.today:
         commentType = EKSI_COMMENTS_TODAY
-    elif type == "all":
+    elif type == CommentType.all:
         commentType = EKSI_COMMENTS_ALL
 
     url = topicUrl + commentType + '&p=' + page
