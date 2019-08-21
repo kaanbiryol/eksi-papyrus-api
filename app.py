@@ -36,12 +36,14 @@ class Topic:
 
 
 class Comment:
-    def __init__(self, comment, date, ownerUsername, ownerProfileUrl, commentUrl):
+    def __init__(self, comment, date, ownerUsername, ownerProfileUrl, commentUrl, currentPage, pageCount):
         self.comment = comment
         self.date = date
         self.ownerUsername = ownerUsername
         self.ownerProfileUrl = ownerProfileUrl
         self.commentUrl = commentUrl
+        self.currentPage = currentPage
+        self.pageCount = pageCount
 
     def serialize(self):
         return {
@@ -49,7 +51,9 @@ class Comment:
             'date': self.date,
             'ownerUsername': self.ownerUsername,
             'ownerProfileUrl': EKSI_BASE_URL + self.ownerProfileUrl,
-            'commentUrl': EKSI_BASE_URL + self.commentUrl
+            'commentUrl': EKSI_BASE_URL + self.commentUrl,
+            'page': currentPage,
+            'pageCount': pageCount
         }
 
 
@@ -139,7 +143,9 @@ def getComments(url):
     authorList = []
     dateList = []
 
-    tree.cssselect('[class="pager"]')[0].get('data-pagecount')
+    pager = tree.cssselect('[class="pager"]')[0]
+    pageCount = pager.get('data-pagecount')
+    currentPage = pager.get('data-currentpage')
 
     for content in ulTag.cssselect('[class="content"]'):
         contentAsHTMLString = tostring(content).decode("utf-8")
@@ -159,7 +165,8 @@ def getComments(url):
         date = dateList[index][0]
         commentUrl = dateList[index][1]
 
-        comment = Comment(content, date, author, authorUrl, commentUrl)
+        comment = Comment(content, date, author, authorUrl,
+                          commentUrl, currentPage, pageCount)
         commentList.append(comment)
 
     return commentList
