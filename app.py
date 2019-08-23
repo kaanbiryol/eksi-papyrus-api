@@ -125,9 +125,21 @@ def query(query):
 
 def getTopics(url):
     topicList = []
-
     response = requests.get(url, headers=headers)
     tree = lxml.html.fromstring(response.text)
+
+    pagerTree = tree.cssselect('[class="pager"]')
+    pager = pagerTree[0] if len(pagerTree) > 0 else None
+    continueLink = tree.cssselect(
+        '[class="full-index-continue-link-container"]')
+
+    if continueLink is None or (continueLink is not None and len(continueLink) == 0):
+        pageCount = 1
+        currentPage = 1
+    else:
+        pageCount = pager.get('data-pagecount') if pager != None else 2
+        currentPage = pager.get('data-currentpage') if pager != None else 1
+
     ulTag = tree.cssselect("[class=topic-list]")[0]
     for liTag in ulTag.cssselect("a"):
         smallTag = liTag.cssselect("small")
@@ -139,7 +151,7 @@ def getTopics(url):
         topicUrl = liTag.get("href")
         popularTopic = Topic(topicTitle, numberOfComments, topicUrl)
         topicList.append(popularTopic)
-    return topicList
+    return (topicList, currentPage, pageCount)
 
 
 def getComments(url):
@@ -225,7 +237,9 @@ def api_getTopics():
     popularList = getTopics(
         generateTopicPageUrl(path=urlPath, page=page))
     return jsonify(
-        topics=[e.serialize() for e in popularList]
+        page=popularList[1],
+        pageCount=popularList[2],
+        topics=[e.serialize() for e in popularList[0]]
     )
 
 
@@ -248,9 +262,9 @@ def api_getComments():
     page = args['page']
     commentList = getComments(makeCommentsUrl(baseCommentUrl, type, page))
     return jsonify(
-        comments=[e.serialize() for e in commentList[0]],
         page=commentList[1],
-        pageCount=commentList[2]
+        pageCount=commentList[2],
+        comments=[e.serialize() for e in commentList[0]]
     )
 
 
