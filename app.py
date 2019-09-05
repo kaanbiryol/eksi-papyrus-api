@@ -21,6 +21,9 @@ EKSI_COMMENTS_TODAY = "?a=dailynice"
 EKSI_COMMENTS_ALL = "?a=nice"
 EKSI_COMMENTS_POPULAR = "?a=popular"
 
+POPULAR_TOPICS_TITLE = "gündem"
+POPULAR_TOPICS_CHANNEL_URL = "/basliklar/kanal/gundem"
+
 
 class CommentType(IntEnum):
     today = 0
@@ -203,7 +206,8 @@ def getChannels():
     for item in channel:
         channelList.append(
             Channel(item.text_content(), item.get("href")))
-
+    channelList.insert(0, Channel(
+        POPULAR_TOPICS_TITLE, POPULAR_TOPICS_CHANNEL_URL))
     return channelList
 
 
