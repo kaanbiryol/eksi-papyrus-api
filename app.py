@@ -22,7 +22,7 @@ EKSI_COMMENTS_ALL = "?a=nice"
 EKSI_COMMENTS_POPULAR = "?a=popular"
 
 POPULAR_TOPICS_TITLE = "gündem"
-POPULAR_TOPICS_CHANNEL_URL = "/basliklar/kanal/gundem"
+POPULAR_TOPICS_CHANNEL_URL = "/basliklar/gundem"
 
 
 class CommentType(IntEnum):
