@@ -51,8 +51,10 @@ class Topic:
 
 
 class Comment:
-    def __init__(self, comment, date, ownerUsername, ownerProfileUrl, commentUrl, currentPage, pageCount):
+    def __init__(self, id, comment, likeCount, date, ownerUsername, ownerProfileUrl, commentUrl, currentPage, pageCount):
+        self.id = id
         self.comment = comment
+        self.likeCount = likeCount
         self.date = date
         self.ownerUsername = ownerUsername
         self.ownerProfileUrl = ownerProfileUrl
@@ -62,7 +64,9 @@ class Comment:
 
     def serialize(self):
         return {
+            'id': self.id,
             'comment': self.comment,
+            'likes': self.likeCount,
             'date': self.date,
             'ownerUsername': self.ownerUsername,
             'ownerProfileUrl': EKSI_BASE_URL + self.ownerProfileUrl,
@@ -163,6 +167,8 @@ def getComments(url):
     tree = lxml.html.fromstring(response.text)
     ulTag = tree.cssselect("[id=entry-item-list]")[0]
 
+    likeCountList = []
+    commentIdList = []
     commentList = []
     contentList = []
     authorList = []
@@ -183,14 +189,20 @@ def getComments(url):
     for date in ulTag.cssselect("a.entry-date.permalink"):
         dateList.append((date.text_content(), date.get("href")))
 
+    for dataId in ulTag.cssselect('li'):
+        commentIdList.append(dataId.get("data-id"))
+        likeCountList.append(dataId.get("data-favorite-count"))
+
     for index, element in enumerate(contentList):
         content = contentList[index]
         authorUrl = authorList[index][0]
         author = authorList[index][1]
         date = dateList[index][0]
         commentUrl = dateList[index][1]
+        commentId = commentIdList[index]
+        likeCount = likeCountList[index]
 
-        comment = Comment(content, date, author, authorUrl,
+        comment = Comment(commentId, content, likeCount, date, author, authorUrl,
                           commentUrl, currentPage, pageCount)
         commentList.append(comment)
 
