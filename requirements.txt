@@ -4,3 +4,4 @@ uwsgi
 lxml
 cssselect
 markdownify
+markdown2

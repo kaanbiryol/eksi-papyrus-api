@@ -4,11 +4,13 @@ import lxml.html
 import flask
 import time
 import json
+import markdown2
 from flask import request, jsonify
 from lxml.etree import tostring
 from markdownify import markdownify as md
 from enum import IntEnum
 from urllib.parse import unquote
+
 
 EKSI_BASE_URL = "http://eksisozluk.com"
 POPULAR_TOPICS_URL = EKSI_BASE_URL + "/basliklar/gundem?p="
@@ -180,7 +182,9 @@ def getComments(url):
 
     for content in ulTag.cssselect('[class="content"]'):
         contentAsHTMLString = tostring(content).decode("utf-8")
-        contentList.append(unquote(md(contentAsHTMLString).strip()))
+        markdown = unquote(md(contentAsHTMLString).strip())
+        html = markdown2.markdown(markdown)
+        contentList.append(html)
 
     for author in ulTag.cssselect("[class=entry-author]"):
         authorUrl = author.get("href")
