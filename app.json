@@ -1,0 +1,10 @@
+{
+    "name": "eksi-papyrus api",
+    "description": "api for 'papyrus for eksi'.",
+    "repository": "https://github.com/kaanbiryol/eksi-papyrus-api",
+    "keywords": [
+        "python",
+        "flask",
+        "api"
+    ]
+}
