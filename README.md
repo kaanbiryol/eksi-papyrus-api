@@ -34,6 +34,8 @@ Run it locally or deploy it to Heroku to test it with the [Papyrus for Eksi](htt
   popular = 1
   all = 2
   ```
+
+## License
   
 ```
 MIT License
